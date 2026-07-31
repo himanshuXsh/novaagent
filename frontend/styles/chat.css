@@ -1,0 +1,48 @@
+/* Chat specific styling */
+
+.chat-message {
+    padding: 16px;
+    border-radius: var(--radius-card);
+    margin-bottom: 16px;
+    max-width: 85%;
+}
+
+.chat-message.user {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-message.assistant {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    margin-right: auto;
+    border-bottom-left-radius: 4px;
+}
+
+/* Streamlit default chat override */
+.stChatMessage {
+    background-color: transparent !important;
+}
+
+.history-item {
+    padding: 12px 16px;
+    border-radius: var(--radius-button);
+    cursor: pointer;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.history-item:hover {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.history-item.active {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}

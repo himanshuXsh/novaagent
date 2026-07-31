@@ -1,0 +1,11 @@
+/* Sidebar CSS is mostly handled via inline styles in Streamlit components for now, 
+   but we can define global overrides here if necessary. */
+
+section[data-testid="stSidebar"] {
+    background-color: var(--bg-sidebar) !important;
+    border-right: 1px solid var(--border) !important;
+}
+
+/* Hide default streamlit menu */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
