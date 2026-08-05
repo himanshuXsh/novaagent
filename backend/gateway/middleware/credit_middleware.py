@@ -1,8 +1,10 @@
-from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi import Request
-from backend.shared.db.session import SessionLocal
-from backend.shared.db.models import User, CreditTransaction
 import logging
+
+from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
+
+from backend.shared.db.models import CreditTransaction, User
+from backend.shared.db.session import SessionLocal
 
 logger = logging.getLogger(__name__)
 

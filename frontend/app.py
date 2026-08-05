@@ -1,11 +1,12 @@
-import streamlit as st
 import os
+
+import streamlit as st
 
 st.set_page_config(
     page_title="NovaAgent",
     page_icon="🤖",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # Load global CSS
@@ -16,6 +17,7 @@ def load_css(file_name):
             st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 load_css("theme.css")
+load_css("shell.css")
 load_css("login.css")
 load_css("dashboard.css")
 load_css("sidebar.css")
@@ -37,6 +39,6 @@ if "jwt" in query_params:
 
 # Simple Routing
 if "jwt" not in st.session_state:
-    import frontend.pages.login as login_page
+    st.switch_page("pages/login.py")
 else:
-    import frontend.pages.dashboard as dashboard_page
+    st.switch_page("pages/dashboard.py")

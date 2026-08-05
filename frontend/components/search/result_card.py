@@ -1,5 +1,7 @@
-import streamlit as st
 import re
+
+import streamlit as st
+
 
 def render_result_card(result_data):
     if not result_data:
@@ -13,10 +15,10 @@ def render_result_card(result_data):
     styled_answer = re.sub(r'\[(\d+)\]', r'<span class="source-badge" style="display:inline-flex; width:18px; height:18px; font-size:10px; margin-left:4px;">\1</span>', answer)
     
     st.markdown(f"""
-        <div class="search-result-card">
-            <div style="margin-bottom: 16px; font-size: 16px; line-height: 1.6; color: var(--text-primary);">
-                {styled_answer}
-            </div>
+<div class="search-result-card">
+<div style="margin-bottom: 16px; font-size: 16px; line-height: 1.6; color: var(--text-primary);">
+{styled_answer}
+</div>
     """, unsafe_allow_html=True)
     
     if images:
@@ -32,13 +34,13 @@ def render_result_card(result_data):
         
         for src in sources:
             st.markdown(f"""
-                <div class="source-item">
-                    <div class="source-badge">{src['id']}</div>
-                    <div class="source-details">
-                        <a href="{src['url']}" target="_blank" class="source-title">{src['title']}</a>
-                        <span class="source-url">{src['url'][:60]}...</span>
-                    </div>
-                </div>
+<div class="source-item">
+<div class="source-badge">{src['id']}</div>
+<div class="source-details">
+<a href="{src['url']}" target="_blank" class="source-title">{src['title']}</a>
+<span class="source-url">{src['url'][:60]}...</span>
+</div>
+</div>
             """, unsafe_allow_html=True)
             
         st.markdown("</div>", unsafe_allow_html=True)

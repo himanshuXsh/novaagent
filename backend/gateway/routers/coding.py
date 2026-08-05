@@ -1,20 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from pydantic import BaseModel
-from typing import Optional
 
-from backend.shared.db.session import get_db
-from backend.shared.db.models import Artifact
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
 from backend.gateway.middleware.auth_guard import get_current_user
-from backend.services.conversation_service import (
-    create_conversation, get_messages, add_message
-)
 from backend.services.agent_service.coding_node import generate_code_response
+from backend.services.conversation_service import (
+    add_message,
+    create_conversation,
+    get_messages,
+)
+from backend.shared.db.models import Artifact
+from backend.shared.db.session import get_db
 
 router = APIRouter(prefix="/agents/code", tags=["Coding Agent"])
 
 class CodeRequest(BaseModel):
-    conversation_id: Optional[str] = None
+    conversation_id: str | None = None
     prompt: str
 
 @router.post("")

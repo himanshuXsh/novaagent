@@ -1,6 +1,8 @@
+
 from sqlalchemy.orm import Session
+
 from backend.shared.db.models import Conversation, Message
-import uuid
+
 
 def create_conversation(db: Session, user_id: str, title: str, agent_type: str = "chat"):
     conv = Conversation(
@@ -13,10 +15,11 @@ def create_conversation(db: Session, user_id: str, title: str, agent_type: str =
     db.refresh(conv)
     return conv
 
-def get_user_conversations(db: Session, user_id: str, limit: int = 50):
-    return db.query(Conversation).filter(
-        Conversation.user_id == user_id
-    ).order_by(Conversation.created_at.desc()).limit(limit).all()
+def get_user_conversations(db: Session, user_id: str, agent_type: str = None, limit: int = 50):
+    query = db.query(Conversation).filter(Conversation.user_id == user_id)
+    if agent_type:
+        query = query.filter(Conversation.agent_type == agent_type)
+    return query.order_by(Conversation.created_at.desc()).limit(limit).all()
 
 def get_conversation(db: Session, conv_id: str, user_id: str):
     return db.query(Conversation).filter(

@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.shared.db.session import get_db
-from backend.shared.db.models import User, CreditTransaction
+
 from backend.gateway.middleware.auth_guard import get_current_user
+from backend.shared.db.models import CreditTransaction, User
+from backend.shared.db.session import get_db
 
 router = APIRouter(prefix="/billing", tags=["Billing"])
 

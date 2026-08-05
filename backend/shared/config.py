@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings
 from pydantic import Field
+from pydantic_settings import BaseSettings
+
 
 class Settings(BaseSettings):
     # Database
@@ -17,6 +18,9 @@ class Settings(BaseSettings):
 
     # Groq
     groq_api_key: str = Field(..., env="GROQ_API_KEY")
+
+    # Tavily
+    tavily_api_key: str = Field(default="", env="TAVILY_API_KEY")
 
     class Config:
         env_file = ".env"

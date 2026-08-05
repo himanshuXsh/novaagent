@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 :root {
   --bg-primary: #0B0F19;
   --bg-secondary: #111827;
@@ -16,6 +18,17 @@
   --radius-button: 12px;
   --space-unit: 8px;
   --font-family: 'Inter', sans-serif;
+  --primary-color: #4F7DF3;
+}
+
+.block-container {
+  padding-top: 2rem !important;
+  padding-bottom: 3rem !important;
+  max-width: 1400px;
+}
+
+html, body, [class*="css"] {
+  font-family: var(--font-family);
 }
 
 body {
@@ -36,3 +49,86 @@ body {
   font-weight: 600;
   transition: all 0.2s ease-out;
 }
+
+/* Hide Streamlit default sidebar nav */
+[data-testid="stSidebarNav"] {
+  display: none !important;
+}
+
+/* Hide the entire sidebar ONLY on the login page via the injected marker */
+.stApp:has(#login-page-marker) section[data-testid="stSidebar"] {
+  display: none !important;
+}
+.stApp:has(#login-page-marker) [data-testid="collapsedControl"] {
+  display: none !important;
+}
+
+
+
+/* Hide Streamlit deploy and menu chrome */
+#MainMenu {
+  visibility: hidden;
+}
+header {
+  visibility: hidden;
+}
+footer {
+  visibility: hidden;
+}
+
+/* ===== Shared UI Components ===== */
+
+.nova-panel {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 22px;
+}
+.nova-panel-title { font-weight: 700; font-size: 15px; color: var(--text-primary); margin-bottom: 14px; }
+
+.btn-primary {
+  width: 100%;
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  padding: 13px;
+  border-radius: var(--radius-button);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+  box-sizing: border-box;
+}
+.btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.btn-dev {
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-google {
+  background: #FFFFFF !important;
+  color: #1F2937 !important;
+  border: none !important;
+  width: 100%;
+  padding: 12px !important;
+  border-radius: var(--radius-button) !important;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn-google:hover { background: #F1F5F9 !important; }
+.google-icon { width: 20px; height: 20px; }
+

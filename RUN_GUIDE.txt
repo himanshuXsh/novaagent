@@ -1,0 +1,58 @@
+# Complete Guide: How to Run NovaAgent in VS Code
+
+There are two completely different ways to run this project. **You can only use ONE at a time.** 
+If you try to use both at the same time, you will get a "Port 8502 is not available" or "Address already in use" error!
+
+---
+
+## METHOD 1: The Docker Way (EASIEST - HIGHLY RECOMMENDED)
+Use this method if you just want the app to run perfectly without any setup or dependency errors.
+
+**Step 1:** Open a terminal in VS Code (`Ctrl` + `\``) in the root `novaagent` folder.
+**Step 2:** Run this exact command:
+```bash
+docker-compose up -d --build
+```
+**Step 3:** Wait 1-2 minutes for the containers to start.
+**Step 4:** Open your web browser and go to: **http://localhost:8502**
+**Step 5:** You're done! The app is running.
+
+*(When you are finished using the app and want to turn it off, run: `docker-compose down`)*
+
+---
+---
+
+## METHOD 2: The Manual Python Way (ADVANCED)
+Use this method ONLY if you want to actively edit the Python code and see live updates.
+**🛑 CRITICAL WARNING:** If you used Method 1 above, you MUST turn Docker off first by running `docker-compose down` before doing this, otherwise the ports will clash!
+
+**Step 1:** Start *only* the databases via Docker:
+```bash
+docker-compose up -d postgres redis minio
+```
+
+**Step 2:** Open a terminal in VS Code, ensure you are in the root `novaagent` folder, and activate your Python environment:
+```powershell
+.\venv\Scripts\activate
+```
+
+**Step 3:** Install dependencies (if you haven't already):
+```powershell
+pip install -r requirements.txt
+pip install -r backend/requirements.txt
+```
+
+**Step 4:** Start the Backend API (in Terminal 1):
+```powershell
+$env:ENVIRONMENT="development"
+python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+**Step 5:** Start the Frontend UI (Open a NEW Terminal 2, activate venv, and run):
+```powershell
+.\venv\Scripts\activate
+$env:ENVIRONMENT="development"
+python -m streamlit run frontend/app.py --server.port 8502
+```
+
+**Step 6:** Open your web browser and go to: **http://localhost:8502**

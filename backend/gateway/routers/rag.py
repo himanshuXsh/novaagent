@@ -1,15 +1,16 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
-import uuid
 import os
 import shutil
+import uuid
 
-from backend.shared.db.session import get_db
-from backend.shared.db.models import Conversation, Message, Document
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
 from backend.gateway.middleware.auth_guard import get_current_user
-from backend.services.agent_service.rag_pipeline import process_document
 from backend.services.agent_service.rag_node import query_document
+from backend.services.agent_service.rag_pipeline import process_document
+from backend.shared.db.models import Conversation, Document, Message
+from backend.shared.db.session import get_db
 
 router = APIRouter(prefix="/agents/rag", tags=["RAG Agent"])
 
@@ -88,4 +89,4 @@ async def query_pdf(req: RagQueryRequest, current_user: dict = Depends(get_curre
 @router.get("/documents")
 async def list_documents(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     docs = db.query(Document).filter(Document.user_id == current_user["user_id"]).order_by(Document.created_at.desc()).all()
-    return [{"id": str(d.id), "filename": d.file_name, "status": d.status} for d in docs]
+    return [{"document_id": str(d.id), "filename": d.file_name, "status": d.status} for d in docs]

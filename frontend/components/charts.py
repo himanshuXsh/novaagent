@@ -1,7 +1,7 @@
-import streamlit as st
-import plotly.express as px
-import plotly.graph_objects as go
 import pandas as pd
+import plotly.express as px
+import streamlit as st
+
 
 def apply_plotly_theme(fig):
     fig.update_layout(
@@ -31,7 +31,7 @@ def render_usage_chart(data):
     fig.update_traces(fill='tozeroy', fillcolor="rgba(79, 125, 243, 0.1)")
     
     fig = apply_plotly_theme(fig)
-    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    st.plotly_chart(fig, width='stretch', config={'displayModeBar': False})
 
 def render_distribution_chart(data):
     if not data:
@@ -49,4 +49,4 @@ def render_distribution_chart(data):
     
     fig = apply_plotly_theme(fig)
     fig.update_traces(textposition='inside', textinfo='percent+label', showlegend=False)
-    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    st.plotly_chart(fig, width='stretch', config={'displayModeBar': False})

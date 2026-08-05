@@ -1,6 +1,9 @@
-import jwt
 from datetime import datetime, timedelta
+
+import jwt
+
 from backend.shared.config import settings
+
 
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=60)):
     to_encode = data.copy()

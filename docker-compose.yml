@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   postgres:
     image: postgres:15
@@ -10,6 +9,12 @@ services:
       - "5454:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U novaagent -d novaagent"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   redis:
     image: redis:7-alpine
@@ -17,7 +22,72 @@ services:
       - "6380:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  minio:
+    image: minio/minio:latest
+    container_name: novaagent-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: novaagent-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # Override local urls with docker networking urls
+      - DATABASE_URL=postgresql://novaagent:qwerty@postgres:5432/novaagent
+      - REDIS_URL=redis://redis:6379/0
+      - MINIO_ENDPOINT=http://minio:9000
+      - FRONTEND_URL=http://localhost:8502
+      - ENV=development
+    volumes:
+      - qdrant_data:/app/backend/data
+      - fastembed_cache:/root/.cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: novaagent-frontend
+    ports:
+      - "8502:8502"
+    environment:
+      # API_BASE_URL is used server-side (container-to-container)
+      - API_BASE_URL=http://backend:8000/api/v1
+      # BROWSER_API_BASE_URL is used for browser-facing links (SSE streams, OAuth redirects)
+      - BROWSER_API_BASE_URL=http://localhost:8000/api/v1
+      - ENVIRONMENT=development
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
   redis_data:
+  minio_data:
+  qdrant_data:
+  fastembed_cache:

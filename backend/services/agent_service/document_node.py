@@ -1,10 +1,13 @@
-import os
 import json
+import os
 import uuid
-from reportlab.pdfgen import canvas
-from pptx import Presentation
+
 from groq import AsyncGroq
+from pptx import Presentation
+from reportlab.pdfgen import canvas
+
 from backend.shared.config import settings
+from backend.shared.storage import storage
 
 client = AsyncGroq(api_key=settings.groq_api_key)
 OUTPUT_DIR = "backend/data/outputs"
@@ -35,17 +38,32 @@ Output ONLY valid JSON in this format:
 
 async def generate_pdf_document(prompt: str):
     response = await client.chat.completions.create(
-        model="llama3-8b-8192",
+        model="llama-3.1-8b-instant",
         messages=[
             {"role": "system", "content": PDF_PROMPT},
             {"role": "user", "content": prompt}
         ],
         temperature=0.2,
-        response_format={"type": "json_object"}
+        response_format={"type": "json_object"},
+        stream=True
     )
     
-    data = json.loads(response.choices[0].message.content)
-    
+    full_content = ""
+    async for chunk in response:
+        if chunk.choices[0].delta.content:
+            content = chunk.choices[0].delta.content
+            full_content += content
+            yield json.dumps({
+                "event": "message",
+                "content": content
+            }) + "\n"
+            
+    # Now parse the accumulated JSON and build the PDF
+    try:
+        data = json.loads(full_content)
+    except Exception as e:
+        data = {"title": "Error generating document", "paragraphs": [f"Could not parse JSON: {e!s}", full_content]}
+        
     file_id = str(uuid.uuid4())
     filename = f"{file_id}.pdf"
     filepath = os.path.join(OUTPUT_DIR, filename)
@@ -66,16 +84,20 @@ async def generate_pdf_document(prompt: str):
         
     c.save()
     
-    return {
+    url = storage.upload_file(filepath, filename)
+    os.remove(filepath)
+    
+    yield json.dumps({
+        "event": "done",
         "title": data.get("title", "Report"),
-        "filepath": filepath,
+        "filepath": url,
         "filename": filename,
         "format": "pdf"
-    }
+    }) + "\n"
 
 async def generate_ppt_document(prompt: str):
     response = await client.chat.completions.create(
-        model="llama3-8b-8192",
+        model="llama-3.1-8b-instant",
         messages=[
             {"role": "system", "content": PPT_PROMPT},
             {"role": "user", "content": prompt}
@@ -119,9 +141,12 @@ async def generate_ppt_document(prompt: str):
                 
     prs.save(filepath)
     
+    url = storage.upload_file(filepath, filename)
+    os.remove(filepath)
+    
     return {
         "title": data.get("title", "Presentation"),
-        "filepath": filepath,
+        "filepath": url,
         "filename": filename,
         "format": "pptx"
     }

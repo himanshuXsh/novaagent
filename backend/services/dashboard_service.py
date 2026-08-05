@@ -1,7 +1,16 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from backend.shared.db.models import User, Conversation, Message, GeneratedFile, CreditTransaction
 from datetime import datetime, timedelta
+
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from backend.shared.db.models import (
+    Conversation,
+    CreditTransaction,
+    GeneratedFile,
+    Message,
+    User,
+)
+
 
 def get_dashboard_metrics(db: Session, user_id: str):
     # Total conversations
@@ -69,3 +78,42 @@ def get_dashboard_activity(db: Session, user_id: str):
         }
         for c in recent_convs
     ]
+
+def get_dashboard_search(db: Session, user_id: str, query: str):
+    q = f"%{query}%"
+    
+    # Search conversations
+    convs = db.query(Conversation).filter(
+        Conversation.user_id == user_id,
+        Conversation.title.ilike(q)
+    ).order_by(Conversation.created_at.desc()).limit(10).all()
+    
+    # Search generated files (assuming they might have a type or url as a proxy for name, or we search by type)
+    files = db.query(GeneratedFile).filter(
+        GeneratedFile.user_id == user_id,
+        GeneratedFile.type.ilike(q)
+    ).order_by(GeneratedFile.created_at.desc()).limit(10).all()
+    
+    results = []
+    
+    for c in convs:
+        results.append({
+            "type": "conversation",
+            "id": str(c.id),
+            "title": c.title,
+            "agent_type": c.agent_type,
+            "created_at": c.created_at.isoformat()
+        })
+        
+    for f in files:
+        results.append({
+            "type": "file",
+            "id": str(f.id),
+            "title": f"Generated {f.type.title()}",
+            "agent_type": "images" if f.type == "image" else "coding",
+            "created_at": f.created_at.isoformat()
+        })
+        
+    # Sort by created_at desc
+    results.sort(key=lambda x: x["created_at"], reverse=True)
+    return results[:10]

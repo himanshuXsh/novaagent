@@ -1,11 +1,32 @@
-/* Sidebar CSS is mostly handled via inline styles in Streamlit components for now, 
-   but we can define global overrides here if necessary. */
+/* Sidebar CSS — global overrides */
 
 section[data-testid="stSidebar"] {
     background-color: var(--bg-sidebar) !important;
     border-right: 1px solid var(--border) !important;
+    /* Lock the sidebar open — prevent Streamlit's CSS transform from collapsing it */
+    transform: none !important;
+    min-width: 244px !important;
+    width: 244px !important;
+    display: flex !important;
+}
+
+/*
+ * Hide the sidebar collapse/expand toggle button on ALL pages.
+ * Login page already hides the sidebar itself via the login-page-marker rule in theme.css.
+ * On authenticated pages we never want users to accidentally collapse the navigation.
+ */
+[data-testid="collapsedControl"] {
+    display: none !important;
+}
+
+/* Keep login page sidebar fully hidden (overrides the transform:none above) */
+.stApp:has(#login-page-marker) section[data-testid="stSidebar"] {
+    display: none !important;
+    min-width: 0 !important;
+    width: 0 !important;
 }
 
 /* Hide default streamlit menu */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
+

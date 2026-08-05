@@ -1,96 +1,122 @@
-import streamlit as st
-from frontend.components.layout.sidebar import render_sidebar
-from frontend.components.layout.navbar import render_navbar
-from frontend.components.cards import render_metric_card, render_agent_card, render_add_custom_agent_card
-from frontend.components.charts import render_usage_chart, render_distribution_chart
-from frontend.utils.api_client import fetch_user_profile, fetch_dashboard_metrics, fetch_dashboard_charts, fetch_dashboard_activity
 
-# Ensure JWT is in session
+import streamlit as st
+
+st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+
+from frontend.components.cards import render_agent_card_nav, render_metric_card_icon
+from frontend.components.charts import render_usage_chart
+from frontend.components.layout.shell import render_sidebar, render_topbar
+from frontend.utils.api_client import (
+    fetch_balance,
+    fetch_dashboard_activity,
+    fetch_dashboard_charts,
+    fetch_dashboard_metrics,
+    fetch_user_profile,
+)
+from frontend.utils.css_loader import load_all_css
+
+load_all_css()
+
 if "jwt" not in st.session_state:
     st.switch_page("app.py")
 
 jwt = st.session_state["jwt"]
 
-# Fetch data
-@st.cache_data(ttl=60)
-def load_dashboard_data(token):
-    user = fetch_user_profile(token)
-    metrics = fetch_dashboard_metrics(token)
-    charts = fetch_dashboard_charts(token)
-    activity = fetch_dashboard_activity(token)
-    return user, metrics, charts, activity
 
-user, metrics, charts, activity = load_dashboard_data(jwt)
+@st.cache_data(ttl=60)
+def load_core_metrics(token):
+    return (
+        fetch_user_profile(token),
+        fetch_dashboard_metrics(token),
+        fetch_balance(token),
+    )
+
+@st.cache_data(ttl=60)
+def load_charts_data(token):
+    return fetch_dashboard_charts(token)
+
+@st.cache_data(ttl=60)
+def load_activity_data(token):
+    return fetch_dashboard_activity(token)
+
+user, metrics, balance = load_core_metrics(jwt)
 
 if not user:
     st.session_state.clear()
     st.switch_page("app.py")
 
-# Render Layout
-render_sidebar()
-render_navbar(user_info=user)
+credits = (balance or {}).get("credits", metrics.get("credits", 0))
+user_for_shell = {**user, "credits": credits}
 
-st.markdown("<div class='dashboard-section-title'>Overview</div>", unsafe_allow_html=True)
+render_sidebar(active="dashboard", user=user_for_shell)
+render_topbar(icon="🏠", title="Dashboard", subtitle="", user=user_for_shell,
+              search_placeholder="Search anything...")
 
-# Metrics Row
+st.markdown("<div class='nova-page-header-spacer'></div>", unsafe_allow_html=True)
+
+name = (user.get("name") or "there").split(" ")[0]
+st.markdown(f"""
+<div class="nova-welcome-banner">
+  <div class="nova-welcome-greeting">Good to see you, <span class="accent">{name}</span> 👋</div>
+  <div class="nova-welcome-sub">Welcome back to your AI workspace.</div>
+</div>
+""", unsafe_allow_html=True)
+
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    render_metric_card("Credits Balance", metrics.get("credits", 0))
+    render_metric_card_icon("⚡", credits, "Credits Left", bg="rgba(79,125,243,0.15)")
 with col2:
-    render_metric_card("Conversations", metrics.get("conversations", 0))
+    render_metric_card_icon("💬", metrics.get("conversations", 0), "Conversations", bg="rgba(109,94,247,0.15)")
 with col3:
-    render_metric_card("Messages Generated", metrics.get("messages", 0))
+    render_metric_card_icon("📨", metrics.get("messages", 0), "Messages Sent", bg="rgba(34,197,94,0.15)")
 with col4:
-    render_metric_card("Files Generated", metrics.get("files", 0))
+    render_metric_card_icon("📁", metrics.get("files", 0), "Files Processed", bg="rgba(245,158,11,0.15)")
 
-st.markdown("<div class='dashboard-section-title'>Agents Workspace</div>", unsafe_allow_html=True)
+st.markdown("<div class='dashboard-section-title'>Choose an Agent</div>", unsafe_allow_html=True)
 
-# Agents Grid
-row1_col1, row1_col2, row1_col3 = st.columns(3)
-with row1_col1:
-    render_agent_card("Chat Agent", "General AI assistant", "💬")
-with row1_col2:
-    render_agent_card("Coding Agent", "Write and review code", "💻")
-with row1_col3:
-    render_agent_card("Search Agent", "Web search with citations", "🔍")
+agents = [
+    ("AI Chat", "Smart conversations with AI", "💬", "pages/chat.py", "rgba(79,125,243,0.15)"),
+    ("Coding Agent", "Write, debug & optimize code", "💻", "pages/coding.py", "rgba(34,197,94,0.15)"),
+    ("Search Agent", "Search the web & get real-time insights", "🔍", "pages/search.py", "rgba(109,94,247,0.15)"),
+    ("RAG Assistant", "Chat with your documents", "📚", "pages/rag.py", "rgba(245,158,11,0.15)"),
+    ("Image Generator", "Create stunning images with AI", "🖼️", "pages/images.py", "rgba(236,72,153,0.15)"),
+]
 
-st.markdown("<br>", unsafe_allow_html=True)
-
-row2_col1, row2_col2, row2_col3 = st.columns(3)
-with row2_col1:
-    render_agent_card("Document RAG", "Chat with your files", "📄")
-with row2_col2:
-    render_agent_card("Image Gen", "Create unique visuals", "🎨")
-with row2_col3:
-    render_add_custom_agent_card()
+cols = st.columns(3)
+for i, (name_a, desc, icon, page, bg) in enumerate(agents):
+    with cols[i % 3]:
+        render_agent_card_nav(name_a, desc, icon, page, bg)
 
 st.markdown("<div class='dashboard-section-title'>Analytics & Activity</div>", unsafe_allow_html=True)
 
 chart_col, activity_col = st.columns([2, 1])
 
 with chart_col:
-    st.markdown("<div style='background-color: var(--bg-card); border-radius: var(--radius-card); padding: 16px; border: 1px solid var(--border);'>", unsafe_allow_html=True)
-    render_usage_chart(charts.get("usage"))
+    st.markdown("<div class='nova-panel'>", unsafe_allow_html=True)
+    st.markdown("<div class='nova-panel-title'>Credits Usage</div>", unsafe_allow_html=True)
+    with st.spinner("Loading charts..."):
+        charts = load_charts_data(jwt)
+        render_usage_chart((charts or {}).get("usage"))
     st.markdown("</div>", unsafe_allow_html=True)
-    
+
 with activity_col:
-    st.markdown("""
-        <div style='background-color: var(--bg-card); border-radius: var(--radius-card); padding: 24px; border: 1px solid var(--border); height: 100%;'>
-            <div style='font-weight: 600; margin-bottom: 16px; color: var(--text-primary);'>Recent Activity</div>
-    """, unsafe_allow_html=True)
-    
-    if not activity:
-        st.info("No recent activity.")
-    else:
-        for item in activity:
-            st.markdown(f"""
-                <div class='activity-item'>
-                    <div>
-                        <div class='activity-title'>{item.get('title')}</div>
-                        <div class='activity-meta'>Agent: {item.get('agent_type')}</div>
-                    </div>
-                    <div class='activity-meta'>{item.get('created_at')[:10]}</div>
-                </div>
-            """, unsafe_allow_html=True)
-            
+    st.markdown("<div class='nova-panel' style='height:100%;'>", unsafe_allow_html=True)
+    st.markdown("<div class='nova-panel-title'>Recent Activity</div>", unsafe_allow_html=True)
+    with st.spinner("Loading activity..."):
+        activity = load_activity_data(jwt)
+        if not activity:
+            st.markdown("<div style='color: var(--text-secondary); font-size: 13px;'>No recent activity yet.</div>", unsafe_allow_html=True)
+        else:
+            for item in activity:
+                st.markdown(f"""
+    <div class='activity-item'>
+    <div>
+    <div class='activity-title'>{item.get('title')}</div>
+    <div class='activity-meta'>Agent: {item.get('agent_type')}</div>
+    </div>
+    <div class='activity-meta'>{(item.get('created_at') or '')[:10]}</div>
+    </div>
+                """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
+
+

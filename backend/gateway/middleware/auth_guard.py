@@ -1,5 +1,6 @@
-from fastapi import Request, HTTPException, Security
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import HTTPException, Request, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
 from backend.services.auth_service.jwt_utils import verify_access_token
 from backend.shared.redis_client import redis_client
 
@@ -24,4 +25,10 @@ async def get_current_user(request: Request, credentials: HTTPAuthorizationCrede
         
     request.state.user_id = user_id
     
-    return {"user_id": user_id, "session_id": session_id}
+    import uuid
+    try:
+        user_uuid = uuid.UUID(user_id)
+    except Exception:
+        user_uuid = user_id
+    
+    return {"user_id": user_uuid, "session_id": session_id}

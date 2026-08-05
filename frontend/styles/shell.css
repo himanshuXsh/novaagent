@@ -1,0 +1,232 @@
+/* ===== Sidebar shell ===== */
+section[data-testid="stSidebar"] {
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  min-width: 272px !important;
+}
+
+section[data-testid="stSidebar"] > div {
+  padding-top: 8px;
+}
+
+.nova-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 4px 20px 4px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nova-sidebar-logo {
+  width: 100%;
+  max-width: 190px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Nav rail buttons */
+.nova-nav-list { margin-bottom: 4px; }
+
+section[data-testid="stSidebar"] .stButton > button {
+  justify-content: flex-start !important;
+  text-align: left !important;
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: var(--radius-button);
+  margin-bottom: 2px;
+  box-shadow: none;
+}
+
+section[data-testid="stSidebar"] .stButton > button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+section[data-testid="stSidebar"] .stButton > button[kind="primary"],
+section[data-testid="stSidebar"] .stButton > button[data-testid="baseButton-primary"],
+section[data-testid="stSidebar"] .stButton > button[data-testid="stBaseButton-primary"] {
+  background: linear-gradient(135deg, rgba(79,125,243,0.18), rgba(109,94,247,0.18));
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(79,125,243,0.4);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--accent-primary);
+}
+
+.nova-sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0 10px 0;
+}
+
+.nova-sidebar-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 4px 10px 6px 10px;
+}
+
+.nova-sidebar-empty {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 6px 10px 12px 10px;
+}
+
+.nova-sidebar-spacer { margin-top: 18px; }
+
+.nova-user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button);
+  margin-bottom: 8px;
+}
+
+.nova-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.nova-user-meta { overflow: hidden; }
+.nova-user-name { font-size: 14px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nova-user-email { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.nova-plan-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-primary);
+  background: rgba(79,125,243,0.12);
+  border: 1px solid rgba(79,125,243,0.3);
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+
+.nova-credits-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.nova-credits-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.nova-credits-value { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+
+.nova-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.nova-progress-fill {
+  height: 100%;
+  background: var(--accent-gradient);
+  border-radius: 999px;
+}
+
+.nova-version-footer {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 10px 0 4px 0;
+}
+
+/* ===== Topbar ===== */
+.nova-topbar-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button);
+  color: var(--text-secondary);
+  font-size: 14px;
+  max-width: 380px;
+}
+.nova-topbar-search-text { flex: 1; }
+.nova-topbar-kbd {
+  font-size: 11px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 6px;
+  color: var(--text-secondary);
+}
+
+.nova-topbar-title { display: flex; align-items: center; gap: 12px; }
+.nova-topbar-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-button);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.nova-topbar-heading { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.nova-topbar-subheading { font-size: 13px; color: var(--text-secondary); }
+
+.nova-topbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.nova-credits-pill {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.nova-bell {
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.nova-avatar-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nova-avatar-circle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 13px;
+  flex-shrink: 0;
+}
+
+.nova-page-header-spacer { margin-bottom: 20px; }

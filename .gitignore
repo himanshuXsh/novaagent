@@ -4,3 +4,7 @@ __pycache__/
 .env
 backend/data/
 .pytest_cache/
+node_modules/
+chroma_db/
+test.db
+*.db

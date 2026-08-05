@@ -1,3 +1,6 @@
 streamlit
 requests
 python-dotenv
+sseclient-py==1.9.0
+plotly
+pandas

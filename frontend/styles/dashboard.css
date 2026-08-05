@@ -34,3 +34,32 @@
   font-size: 12px;
   color: var(--text-secondary);
 }
+
+/* ===== New dashboard shell additions ===== */
+.nova-welcome-banner {
+  background: linear-gradient(120deg, rgba(79,125,243,0.14), rgba(109,94,247,0.10));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 28px 32px;
+  margin-bottom: 20px;
+}
+.nova-welcome-greeting { font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+.nova-welcome-greeting .accent { color: var(--accent-primary); }
+.nova-welcome-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 18px; }
+
+.nova-agent-card {
+  background-color: var(--bg-secondary);
+  padding: 22px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+  text-align: left;
+  margin-bottom: 6px;
+}
+.nova-agent-card-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; margin-bottom: 14px;
+}
+.nova-agent-card-name { font-weight: 700; font-size: 15px; color: var(--text-primary); margin-bottom: 6px; }
+.nova-agent-card-desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.4; }
