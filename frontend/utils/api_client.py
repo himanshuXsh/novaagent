@@ -5,7 +5,7 @@ import streamlit as st
 
 API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000/api/v1")
 # Use a browser-accessible URL for anchor links
-BROWSER_API_BASE_URL = os.environ.get("BROWSER_API_BASE_URL", "http://localhost:8000/api/v1")
+BROWSER_API_BASE_URL = os.environ.get("BROWSER_API_BASE_URL", API_BASE_URL)
 
 def get_google_login_url():
     return f"{BROWSER_API_BASE_URL}/auth/google/login"
