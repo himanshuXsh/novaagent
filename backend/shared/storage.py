@@ -21,7 +21,12 @@ class StorageClient:
         try:
             self.client.head_bucket(Bucket=self.bucket_name)
         except ClientError:
-            self.client.create_bucket(Bucket=self.bucket_name)
+            try:
+                self.client.create_bucket(Bucket=self.bucket_name)
+            except Exception as e:
+                print(f"Warning: Could not create MinIO bucket. Storage may be unavailable. Error: {e}")
+        except Exception as e:
+            print(f"Warning: Could not connect to MinIO. Storage may be unavailable. Error: {e}")
             
     def upload_file(self, file_path: str, object_name: str) -> str:
         self.client.upload_file(file_path, self.bucket_name, object_name)
