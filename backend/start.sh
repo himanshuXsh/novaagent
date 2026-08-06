@@ -1,4 +1,5 @@
 #!/bin/bash
+# Force LF line endings
 echo "Running migrations..."
 alembic upgrade head
 echo "Starting Uvicorn..."
