@@ -12,5 +12,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # so that imports like `backend.main` work correctly
 COPY . /app/backend
 
-# The command to run FastAPI
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# The command to run FastAPI and migrations
+CMD ["python", "backend/run.py"]
