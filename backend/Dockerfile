@@ -2,15 +2,16 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system dependencies if any needed (e.g. for psycopg2)
+# Install system dependencies (psycopg2 needs libpq-dev and gcc)
 RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy and install Python dependencies first (for layer caching)
+COPY requirements.txt ./backend/requirements.txt
+RUN pip install --no-cache-dir -r backend/requirements.txt
 
 # Copy the entire backend directory into /app/backend
-# so that imports like `backend.main` work correctly
+# This ensures imports like `from backend.gateway...` work correctly
 COPY . /app/backend
 
-# The command to run FastAPI and migrations
+# Run migrations then start the server
 CMD ["python", "backend/run.py"]
