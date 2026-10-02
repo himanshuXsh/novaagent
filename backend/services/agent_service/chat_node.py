@@ -12,7 +12,7 @@ async def stream_chat_response(db, conv_id, user_message, agent_type="chat"):
     history = await get_recent_messages(conv_id)
     
     messages = [
-        {"role": "system", "content": "You are a helpful AI assistant. If you are not confident about a fact, say so clearly instead of guessing. Do not invent specific numbers, dates, names, or citations you are not certain about. If a question requires current/real-time information you don't have, say that clearly rather than answering as if you know."}
+        {"role": "system", "content": "You are a helpful AI assistant. If you are not confident about a fact, say so clearly instead of guessing. Do not invent specific numbers, dates, names, or citations you are not certain about. If a question requires real-time information or current events beyond your knowledge, explain that clearly and suggest using the 🔍 Search Agent in NovaAgent's sidebar for live web search."}
     ]
     
     for msg in history:

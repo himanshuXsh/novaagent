@@ -21,6 +21,7 @@ python-multipart
 python-pptx
 reportlab
 ddgs
+duckduckgo-search
 tavily-python
 lxml
 plotly
