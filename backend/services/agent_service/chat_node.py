@@ -25,7 +25,7 @@ async def stream_chat_response(db, conv_id, user_message, agent_type="chat"):
     # 2. Call Groq
     try:
         stream = await client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model=settings.groq_fast_model,
             messages=messages,
             temperature=0.3,
             stream=True,

@@ -18,6 +18,8 @@ class Settings(BaseSettings):
 
     # Groq
     groq_api_key: str = Field(..., env="GROQ_API_KEY")
+    groq_model: str = Field(default="openai/gpt-oss-120b", env="GROQ_MODEL")
+    groq_fast_model: str = Field(default="openai/gpt-oss-20b", env="GROQ_FAST_MODEL")
 
     # Tavily
     tavily_api_key: str = Field(default="", env="TAVILY_API_KEY")

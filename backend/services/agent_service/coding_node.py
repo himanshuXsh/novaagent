@@ -33,7 +33,7 @@ async def generate_code_response(history, user_message):
     messages.append({"role": "user", "content": user_message})
         
     response = await client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model=settings.groq_model,
         messages=messages,
         temperature=0.2,
     )

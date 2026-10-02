@@ -82,7 +82,7 @@ async def query_document(query: str, document_id: str):
 
     try:
         response = await client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=settings.groq_model,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}

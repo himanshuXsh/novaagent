@@ -86,7 +86,7 @@ async def generate_search_response(query: str):
     
     try:
         response = await client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model=settings.groq_fast_model,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt}

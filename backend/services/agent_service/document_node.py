@@ -38,7 +38,7 @@ Output ONLY valid JSON in this format:
 
 async def generate_pdf_document(prompt: str):
     response = await client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model=settings.groq_fast_model,
         messages=[
             {"role": "system", "content": PDF_PROMPT},
             {"role": "user", "content": prompt}
@@ -85,7 +85,11 @@ async def generate_pdf_document(prompt: str):
     c.save()
     
     url = storage.upload_file(filepath, filename)
-    os.remove(filepath)
+    if not url.startswith("/api/"):
+        try:
+            os.remove(filepath)
+        except OSError:
+            pass
     
     yield json.dumps({
         "event": "done",
@@ -97,7 +101,7 @@ async def generate_pdf_document(prompt: str):
 
 async def generate_ppt_document(prompt: str):
     response = await client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model=settings.groq_fast_model,
         messages=[
             {"role": "system", "content": PPT_PROMPT},
             {"role": "user", "content": prompt}
@@ -142,7 +146,11 @@ async def generate_ppt_document(prompt: str):
     prs.save(filepath)
     
     url = storage.upload_file(filepath, filename)
-    os.remove(filepath)
+    if not url.startswith("/api/"):
+        try:
+            os.remove(filepath)
+        except OSError:
+            pass
     
     return {
         "title": data.get("title", "Presentation"),

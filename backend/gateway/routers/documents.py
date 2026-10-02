@@ -115,8 +115,17 @@ async def create_ppt(req: DocRequest, current_user: dict = Depends(get_current_u
         "format": "pptx"
     }
 
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 
+OUTPUT_DIR = "backend/data/outputs"
+
+@router.get("/raw/{filename}")
+async def get_raw_file(filename: str):
+    safe_name = os.path.basename(filename)
+    path = os.path.join(OUTPUT_DIR, safe_name)
+    if os.path.exists(path):
+        return FileResponse(path, filename=safe_name)
+    raise HTTPException(status_code=404, detail="File not found")
 
 @router.get("/download/{file_id}")
 async def download_file(file_id: str, db: Session = Depends(get_db)):
@@ -124,6 +133,13 @@ async def download_file(file_id: str, db: Session = Depends(get_db)):
     if not gen_file:
         raise HTTPException(status_code=404, detail="File not found")
         
+    if gen_file.file_url.startswith("http://") or gen_file.file_url.startswith("https://"):
+        return RedirectResponse(url=gen_file.file_url)
+    
+    filename = os.path.basename(gen_file.file_url)
+    path = os.path.join(OUTPUT_DIR, filename)
+    if os.path.exists(path):
+        return FileResponse(path, filename=filename)
     return RedirectResponse(url=gen_file.file_url)
 
 @router.get("/history")

@@ -21,6 +21,8 @@ class RagQueryRequest(BaseModel):
     document_id: str
     query: str
 
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit
+
 @router.post("/upload")
 async def upload_pdf(file: UploadFile = File(...), current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     if not file.filename.endswith(".pdf"):
@@ -29,8 +31,26 @@ async def upload_pdf(file: UploadFile = File(...), current_user: dict = Depends(
     doc_id = str(uuid.uuid4())
     filepath = os.path.join(UPLOAD_DIR, f"{doc_id}.pdf")
     
-    with open(filepath, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    file_size = 0
+    try:
+        with open(filepath, "wb") as buffer:
+            while chunk := await file.read(1024 * 1024):
+                file_size += len(chunk)
+                if file_size > MAX_FILE_SIZE:
+                    buffer.close()
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
+                    raise HTTPException(
+                        status_code=413,
+                        detail="File size exceeds the 10MB limit. Please upload a smaller document."
+                    )
+                buffer.write(chunk)
+    except HTTPException:
+        raise
+    except Exception as e:
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        raise HTTPException(status_code=500, detail=f"Failed to save upload: {e}")
         
     # Store in DB
     db_doc = Document(
@@ -52,6 +72,11 @@ async def upload_pdf(file: UploadFile = File(...), current_user: dict = Depends(
     except Exception as e:
         db_doc.status = "failed"
         db.commit()
+        if os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+            except OSError:
+                pass
         raise HTTPException(status_code=500, detail=str(e))
         
     return {"document_id": doc_id, "filename": file.filename, "status": "processed"}

@@ -1,3 +1,4 @@
+import gc
 import os
 import uuid
 
@@ -85,18 +86,24 @@ def _ensure_collection():
 
 
 
-def extract_text_from_pdf(filepath: str) -> str:
+MAX_PAGES = 50
+MAX_CHUNKS = 150
+
+def extract_text_from_pdf(filepath: str, max_pages: int = MAX_PAGES) -> str:
     text = ""
     with pymupdf.open(filepath) as doc:
-        for page in doc:
+        for i, page in enumerate(doc):
+            if i >= max_pages:
+                logger.info(f"Reached max page limit of {max_pages} pages.")
+                break
             text += page.get_text() + "\n"
     return text
 
 
-def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> list[str]:
+def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50, max_chunks: int = MAX_CHUNKS) -> list[str]:
     chunks = []
     start = 0
-    while start < len(text):
+    while start < len(text) and len(chunks) < max_chunks:
         end = min(start + chunk_size, len(text))
         chunks.append(text[start:end])
         if end == len(text):
@@ -111,11 +118,11 @@ async def process_document(filepath: str, document_id: str):
     if _embed_model is None:
         raise RuntimeError("Embedding model is not available.")
 
-    # 1. Extract text
+    # 1. Extract text with page limit to protect memory
     full_text = extract_text_from_pdf(filepath)
     logger.info(f"Extracted {len(full_text)} chars from document {document_id}")
 
-    # 2. Chunk text
+    # 2. Chunk text with chunk limit
     chunks = chunk_text(full_text)
     logger.info(f"Created {len(chunks)} chunks for document {document_id}")
 
@@ -126,28 +133,33 @@ async def process_document(filepath: str, document_id: str):
     if not _ensure_collection():
         raise RuntimeError("Could not create or access Qdrant collection.")
 
-    # 4. Generate embeddings using low-level fastembed API
-    embeddings = list(_embed_model.embed(chunks))
+    # 4. Generate embeddings and upsert in small batches of 16 to keep RAM strictly below 512MB
+    batch_size = 16
+    total_upserted = 0
+    for i in range(0, len(chunks), batch_size):
+        batch_chunks = chunks[i:i + batch_size]
+        batch_embeddings = list(_embed_model.embed(batch_chunks))
+        
+        points = []
+        for j, (chunk, embedding) in enumerate(zip(batch_chunks, batch_embeddings)):
+            points.append(PointStruct(
+                id=str(uuid.uuid4()),
+                vector=embedding.tolist(),
+                payload={
+                    "document_id": document_id,
+                    "chunk_index": i + j,
+                    "document": chunk,
+                }
+            ))
 
-    # 5. Build points and upsert
-    points = []
-    for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
-        points.append(PointStruct(
-            id=str(uuid.uuid4()),
-            vector=embedding.tolist(),
-            payload={
-                "document_id": document_id,
-                "chunk_index": i,
-                "document": chunk,
-            }
-        ))
+        try:
+            q_client.upsert(collection_name=COLLECTION_NAME, points=points)
+            total_upserted += len(points)
+        except Exception as e:
+            logger.error(f"Qdrant upsert failed ({type(e).__name__}: {e})", exc_info=True)
+            raise RuntimeError(f"Qdrant upsert failed: {e}") from e
 
-    try:
-        q_client.upsert(collection_name=COLLECTION_NAME, points=points)
-        logger.info(f"Upserted {len(points)} vectors into Qdrant for document {document_id}")
-    except Exception as e:
-        logger.error(f"Qdrant upsert failed ({type(e).__name__}: {e})", exc_info=True)
-        raise RuntimeError(f"Qdrant upsert failed: {e}") from e
-
-    return len(chunks)
+    gc.collect()
+    logger.info(f"Upserted {total_upserted} vectors into Qdrant for document {document_id}")
+    return total_upserted
 
